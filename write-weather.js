@@ -5,13 +5,21 @@ const provider = new ethers.providers.JsonRpcProvider(
 );
 const axios = require("axios");
 const { get } = require("http");
+const { Multicall } = require("ethereum-multicall");
 
 const privateKey = process.env.PRIVATE_KEY;
 const weatherRecordAddress = "0x49354813d8BFCa86f778DfF4120ad80E4D96D74E";
+const multicallAddress = "0xd2e17686dD5642318e182179081854C7eB32fB56";
 const temperatureDecimal = 2;
 const defaultGasPrice = ethers.utils.parseUnits("5000", "gwei");
 const impossibleTemperature = 1000;
 const signBit = 0x10000; // used for check negative numbers on smart contract
+
+const multicall = new Multicall({
+  multicallCustomContractAddress: multicallAddress,
+  ethersProvider: provider,
+  tryAggregate: true,
+});
 
 if (privateKey == undefined) {
   console.log("please run with a private key like this");
@@ -33,11 +41,7 @@ async function getWeatherRecord(batchId, cityName) {
     batchId,
     cityNameByteCode
   );
-  console.log(
-    `get temperature ${parseTemperatureFromContract(
-      record
-    )} of ${cityName} from contract by batch id ${batchId}`
-  );
+  outputTemperatureFromContract(batchId, cityName, record);
 }
 
 async function reportWeatherRecord(batchId, cityName, temperatureWithDecimal) {
@@ -109,6 +113,14 @@ function getStringByByteCode(byteCode) {
   return ethers.utils.parseBytes32String(byteCode);
 }
 
+function outputTemperatureFromContract(batchId, cityName, temperature) {
+  console.log(
+    `get temperature ${parseTemperatureFromContract(
+      temperature
+    )} of ${cityName} from contract by batch id ${batchId}`
+  );
+}
+
 async function reportSingleCityTemperature(cityName) {
   const secondsSinceEpoch = Math.round(Date.now() / 1000);
   let batchId = secondsSinceEpoch;
@@ -123,4 +135,80 @@ async function reportSingleCityTemperature(cityName) {
   await getWeatherRecord(batchId, cityName);
 }
 
-reportSingleCityTemperature("shenzhen");
+async function reportMultipleCityTemperatures(cityNameList) {
+  const secondsSinceEpoch = Math.round(Date.now() / 1000);
+  let batchId = secondsSinceEpoch;
+
+  let contractCallContext = {
+    reference: `WeatherRecord`,
+    contractAddress: weatherRecordAddress,
+    abi: weatherRecordABI,
+  };
+
+  let calls = [];
+  for (let i = 0; i < cityNameList.length; i++) {
+    let cityName = cityNameList[i];
+    let temperatureWithDecimal = await getTemperatureWithDecimalByCity(
+      cityName
+    );
+    if (temperatureWithDecimal == impossibleTemperature) {
+      console.log(`wrong temperature data of ${cityName}`);
+      continue;
+    }
+
+    let call = {
+      reference: "reportWeatherCall",
+      methodName: "reportWeather",
+      methodParameters: [
+        batchId,
+        getByteCodeByString(cityName),
+        temperatureWithDecimal,
+      ],
+    };
+    calls.push(call);
+    console.log(call);
+  }
+
+  contractCallContext.calls = calls;
+
+  const { results, blockNumber } = await multicall.call(contractCallContext);
+  console.log(results.WeatherRecord.callsReturnContext);
+}
+
+async function getMultipleCityTemperatures(batchIdList, cityNameList) {
+  if (batchIdList.length != cityNameList.length) {
+    console.log("list parameters length is not equal");
+    return;
+  }
+  let contractCallContext = {
+    reference: `WeatherRecord`,
+    contractAddress: weatherRecordAddress,
+    abi: weatherRecordABI,
+  };
+
+  let calls = [];
+  for (let i = 0; i < cityNameList.length; i++) {
+    let cityName = cityNameList[i];
+    let call = {
+      reference: "getWeatherCall",
+      methodName: "getWeather",
+      methodParameters: [batchIdList[i], getByteCodeByString(cityName)],
+    };
+    calls.push(call);
+  }
+
+  contractCallContext.calls = calls;
+
+  const { results, blockNumber } = await multicall.call(contractCallContext);
+  for (let i = 0; i < results.WeatherRecord.callsReturnContext.length; i++) {
+    let result = results.WeatherRecord.callsReturnContext[i];
+    let temperature = result.returnValues[0];
+    let batchId = result.methodParameters[0];
+    let cityName = getStringByByteCode(result.methodParameters[1]);
+    outputTemperatureFromContract(batchId, cityName, temperature);
+  }
+}
+
+// reportSingleCityTemperature("shenzhen");
+// reportMultipleCityTemperatures(["shenzhen", "shanghai", "beijing"]);
+getMultipleCityTemperatures([1656757414, 1656757389], ["shenzhen", "shenzhen"]);
