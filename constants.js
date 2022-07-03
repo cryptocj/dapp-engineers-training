@@ -20,7 +20,7 @@ const multicall = new Multicall({
   tryAggregate: true,
 });
 
-const wallet = NaN;
+let wallet = NaN;
 if (privateKey) {
   wallet = new Wallet(privateKey, provider);
 }
