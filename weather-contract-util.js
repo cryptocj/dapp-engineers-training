@@ -1,9 +1,15 @@
 const { ethers } = require("ethers");
-const { temperatureDecimal } = require("./weather-source");
+const {
+  temperatureDecimal,
+  impossibleTemperature,
+} = require("./weather-source");
 
 const signBit = 0x10000; // used for check negative numbers on smart contract
 
 function decodeTemperatureFromContract(temperature) {
+  if (temperature == impossibleTemperature * 10 ** temperatureDecimal) {
+    return "impossible";
+  }
   let exactTemperature = temperature;
   let signFlag = "+";
   if (temperature & signBit) {

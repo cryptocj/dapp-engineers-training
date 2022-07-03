@@ -4,6 +4,7 @@ const {
   getStringByByteCode,
   getByteCodeByString,
   encodeTemperatureWithSignBit,
+  decodeTemperatureFromContract,
   signBit,
 } = require("../weather-contract-util");
 
@@ -31,6 +32,22 @@ describe("Weather contract util", function () {
       for (let i = 0; i < temperatureWithDecimalList.length; i++) {
         expect(
           encodeTemperatureWithSignBit(temperatureWithDecimalList[i])
+        ).equal(expectTemperatureList[i]);
+      }
+    });
+
+    it("decode", function () {
+      let temperatureFromContractList = [2700, 0, 2700 | signBit, 100000, 2720];
+      let expectTemperatureList = [
+        "+27 °C",
+        "+0 °C",
+        "-27 °C",
+        "impossible",
+        "+27.2 °C",
+      ];
+      for (let i = 0; i < temperatureFromContractList.length; i++) {
+        expect(
+          decodeTemperatureFromContract(temperatureFromContractList[i])
         ).equal(expectTemperatureList[i]);
       }
     });
