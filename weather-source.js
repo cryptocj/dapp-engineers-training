@@ -27,7 +27,11 @@ async function getTemperatureWithDecimalByCity(cityName) {
 // +27.2 °C
 // -27.2 °C
 function parseTemperature(temperatureStr) {
-  return parseFloat(temperatureStr) || impossibleTemperature;
+  let temperature = parseFloat(temperatureStr);
+  if (isNaN(temperature)) {
+    return impossibleTemperature;
+  }
+  return temperature;
 }
 
 module.exports = {
