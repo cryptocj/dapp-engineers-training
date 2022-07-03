@@ -1,5 +1,5 @@
 const { ethers } = require("ethers");
-const cronosOracleABI = require("./cronos-oracle-abi.js");
+const cronosOracleABI = require("../../abi/cronos-oracle-abi.js");
 const provider = new ethers.providers.JsonRpcProvider(
   "https://rpc.vvs.finance"
 );

@@ -6,7 +6,7 @@ const {
   encodeTemperatureWithSignBit,
   decodeTemperatureFromContract,
   signBit,
-} = require("../weather-contract-util");
+} = require("../assignments/first-week/weather-contract-util");
 
 describe("Weather contract util", function () {
   describe("convert between with bytecode and string", function () {

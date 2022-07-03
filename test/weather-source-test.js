@@ -10,7 +10,7 @@ const {
   weatherSourceUrl,
   parseTemperature,
   impossibleTemperature,
-} = require("../weather-source");
+} = require("../assignments/first-week/weather-source");
 
 describe("Weather source query and parse", function () {
   describe("parse weather source", function () {

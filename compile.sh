@@ -1,1 +1,1 @@
-solc --bin --abi multicall.sol -o solc_output
+solc --bin --abi contracts/multicall.sol -o solc_output

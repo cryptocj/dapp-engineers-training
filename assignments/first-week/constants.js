@@ -8,7 +8,7 @@ const defaultGasPrice = ethers.utils.parseUnits("5000", "gwei");
 const provider = new ethers.providers.JsonRpcProvider(
   "https://cronos-testnet-3.crypto.org:8545/"
 );
-const weatherRecordABI = require("./weather-record-abi.js");
+const weatherRecordABI = require("../../abi/weather-record-abi.js");
 const weatherRecordContract = new ethers.Contract(
   weatherRecordAddress,
   weatherRecordABI,
