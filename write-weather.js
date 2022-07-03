@@ -1,5 +1,11 @@
 const { Wallet, ethers } = require("ethers");
 const weatherRecordABI = require("./weather-record-abi.js");
+const {
+  getTemperatureWithDecimalByCity,
+  impossibleTemperature,
+  temperatureDecimal,
+} = require("./weather-source");
+
 const provider = new ethers.providers.JsonRpcProvider(
   "https://cronos-testnet-3.crypto.org:8545/"
 );
@@ -10,9 +16,7 @@ const { Multicall } = require("ethereum-multicall");
 const privateKey = process.env.PRIVATE_KEY;
 const weatherRecordAddress = "0x49354813d8BFCa86f778DfF4120ad80E4D96D74E";
 const multicallAddress = "0xd2e17686dD5642318e182179081854C7eB32fB56";
-const temperatureDecimal = 2;
 const defaultGasPrice = ethers.utils.parseUnits("5000", "gwei");
-const impossibleTemperature = 1000;
 const signBit = 0x10000; // used for check negative numbers on smart contract
 
 const multicall = new Multicall({
@@ -60,34 +64,6 @@ async function reportWeatherRecord(batchId, cityName, temperatureWithDecimal) {
   const tx = await provider.sendTransaction(signedTx);
   await provider.waitForTransaction(tx.hash);
   console.log("confirmed tx id:", tx.hash);
-}
-
-async function getTemperatureByCity(cityName) {
-  const url = `https://goweather.herokuapp.com/weather/${cityName}`;
-  try {
-    const { data } = await axios.get(url);
-    if (!data.hasOwnProperty("temperature")) {
-      return impossibleTemperature;
-    }
-    return parseTemperature(data.temperature);
-  } catch (error) {
-    console.log(error);
-    return impossibleTemperature;
-  }
-}
-
-async function getTemperatureWithDecimalByCity(cityName) {
-  let temperature = await getTemperatureByCity(cityName);
-  if (temperature != impossibleTemperature) {
-    return temperature * 10 ** temperatureDecimal;
-  }
-  return impossibleTemperature;
-}
-
-// +27.2 °C
-// -27.2 °C
-function parseTemperature(temperatureStr) {
-  return parseFloat(temperatureStr) || impossibleTemperature;
 }
 
 function parseTemperatureFromContract(temperature) {
@@ -209,6 +185,6 @@ async function getMultipleCityTemperatures(batchIdList, cityNameList) {
   }
 }
 
-// reportSingleCityTemperature("shenzhen");
+reportSingleCityTemperature("shenzhen");
 // reportMultipleCityTemperatures(["shenzhen", "shanghai", "beijing"]);
-getMultipleCityTemperatures([1656757414, 1656757389], ["shenzhen", "shenzhen"]);
+// getMultipleCityTemperatures([1656757414, 1656757389], ["shenzhen", "shenzhen"]);
