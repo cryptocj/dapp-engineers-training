@@ -9,8 +9,7 @@ const {
 const provider = new ethers.providers.JsonRpcProvider(
   "https://cronos-testnet-3.crypto.org:8545/"
 );
-const axios = require("axios");
-const { get } = require("http");
+
 const { Multicall } = require("ethereum-multicall");
 
 const privateKey = process.env.PRIVATE_KEY;

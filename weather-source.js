@@ -21,10 +21,7 @@ async function getTemperatureByCity(cityName) {
 
 async function getTemperatureWithDecimalByCity(cityName) {
   let temperature = await getTemperatureByCity(cityName);
-  if (temperature != impossibleTemperature) {
-    return temperature * 10 ** temperatureDecimal;
-  }
-  return impossibleTemperature;
+  return temperature * 10 ** temperatureDecimal;
 }
 
 // +27.2 °C
@@ -39,4 +36,5 @@ module.exports = {
   parseTemperature: parseTemperature,
   impossibleTemperature: impossibleTemperature,
   temperatureDecimal: temperatureDecimal,
+  weatherSourceUrl: weatherSourceUrl,
 };
