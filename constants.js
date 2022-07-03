@@ -1,3 +1,4 @@
+const { Multicall } = require("ethereum-multicall");
 const { ethers, Wallet } = require("ethers");
 
 const privateKey = process.env.PRIVATE_KEY;
@@ -13,7 +14,16 @@ const weatherRecordContract = new ethers.Contract(
   weatherRecordABI,
   provider
 );
-const wallet = new Wallet(privateKey, provider);
+const multicall = new Multicall({
+  multicallCustomContractAddress: multicallAddress,
+  ethersProvider: provider,
+  tryAggregate: true,
+});
+
+const wallet = NaN;
+if (privateKey) {
+  wallet = new Wallet(privateKey, provider);
+}
 
 module.exports = {
   privateKey: privateKey,
@@ -23,4 +33,6 @@ module.exports = {
   provider: provider,
   weatherRecordContract: weatherRecordContract,
   wallet: wallet,
+  multicall: multicall,
+  weatherRecordABI: weatherRecordABI,
 };
