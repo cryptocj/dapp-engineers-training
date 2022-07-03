@@ -40,4 +40,5 @@ module.exports = {
   getByteCodeByString: getByteCodeByString,
   getStringByByteCode: getStringByByteCode,
   outputTemperatureFromContract: outputTemperatureFromContract,
+  signBit: signBit,
 };
