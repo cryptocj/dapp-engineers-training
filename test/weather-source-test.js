@@ -1,7 +1,6 @@
 var expect = require("chai").expect;
 const HttpRequestMock = require("http-request-mock");
 const mocker = HttpRequestMock.setup();
-const axios = require("axios");
 const shenzhen = require("./weather/shenzhen");
 const shenzhen1 = require("./weather/shenzhen1");
 const montevideo = require("./weather/montevideo");
@@ -11,7 +10,6 @@ const {
   weatherSourceUrl,
   parseTemperature,
   impossibleTemperature,
-  temperatureDecimal,
 } = require("../weather-source");
 
 describe("Weather source query and parse", function () {
