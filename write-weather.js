@@ -3,7 +3,6 @@ const weatherRecordABI = require("./weather-record-abi.js");
 const {
   getTemperatureWithDecimalByCity,
   impossibleTemperature,
-  temperatureDecimal,
 } = require("./weather-source");
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -11,12 +10,16 @@ const provider = new ethers.providers.JsonRpcProvider(
 );
 
 const { Multicall } = require("ethereum-multicall");
+const {
+  getByteCodeByString,
+  encodeTemperatureWithSignBit,
+  outputTemperatureFromContract,
+} = require("./weather-contract-util.js");
 
 const privateKey = process.env.PRIVATE_KEY;
 const weatherRecordAddress = "0x49354813d8BFCa86f778DfF4120ad80E4D96D74E";
 const multicallAddress = "0xd2e17686dD5642318e182179081854C7eB32fB56";
 const defaultGasPrice = ethers.utils.parseUnits("5000", "gwei");
-const signBit = 0x10000; // used for check negative numbers on smart contract
 
 const multicall = new Multicall({
   multicallCustomContractAddress: multicallAddress,
@@ -63,37 +66,6 @@ async function reportWeatherRecord(batchId, cityName, temperatureWithDecimal) {
   const tx = await provider.sendTransaction(signedTx);
   await provider.waitForTransaction(tx.hash);
   console.log("confirmed tx id:", tx.hash);
-}
-
-function parseTemperatureFromContract(temperature) {
-  let exactTemperature = temperature;
-  let signFlag = "+";
-  if (temperature & signBit) {
-    signFlag = "-";
-    exactTemperature = temperature & ~signBit;
-  }
-  return `${signFlag}${exactTemperature / 10 ** temperatureDecimal} °C`;
-}
-
-function encodeTemperatureWithSignBit(temperature) {
-  if (temperature < 0) return -temperature | signBit;
-  return temperature;
-}
-
-function getByteCodeByString(str) {
-  return ethers.utils.formatBytes32String(str);
-}
-
-function getStringByByteCode(byteCode) {
-  return ethers.utils.parseBytes32String(byteCode);
-}
-
-function outputTemperatureFromContract(batchId, cityName, temperature) {
-  console.log(
-    `get temperature ${parseTemperatureFromContract(
-      temperature
-    )} of ${cityName} from contract by batch id ${batchId}`
-  );
 }
 
 async function reportSingleCityTemperature(cityName) {
