@@ -3,7 +3,7 @@ const { temperatureDecimal } = require("./weather-source");
 
 const signBit = 0x10000; // used for check negative numbers on smart contract
 
-function parseTemperatureFromContract(temperature) {
+function decodeTemperatureFromContract(temperature) {
   let exactTemperature = temperature;
   let signFlag = "+";
   if (temperature & signBit) {
@@ -28,14 +28,14 @@ function getStringByByteCode(byteCode) {
 
 function outputTemperatureFromContract(batchId, cityName, temperature) {
   console.log(
-    `get temperature ${parseTemperatureFromContract(
+    `get temperature ${decodeTemperatureFromContract(
       temperature
     )} of ${cityName} from contract by batch id ${batchId}`
   );
 }
 
 module.exports = {
-  parseTemperatureFromContract: parseTemperatureFromContract,
+  decodeTemperatureFromContract: decodeTemperatureFromContract,
   encodeTemperatureWithSignBit: encodeTemperatureWithSignBit,
   getByteCodeByString: getByteCodeByString,
   getStringByByteCode: getStringByByteCode,
