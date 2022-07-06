@@ -19,7 +19,7 @@ function decodeTemperatureFromContract(temperature) {
   return `${signFlag}${exactTemperature / 10 ** temperatureDecimal} °C`;
 }
 
-function encodeTemperatureWithSignBit(temperature) {
+function encodeTemperatureBySignBit(temperature) {
   if (temperature < 0) return -temperature | signBit;
   return temperature;
 }
@@ -42,7 +42,7 @@ function outputTemperatureFromContract(batchId, cityName, temperature) {
 
 module.exports = {
   decodeTemperatureFromContract: decodeTemperatureFromContract,
-  encodeTemperatureWithSignBit: encodeTemperatureWithSignBit,
+  encodeTemperatureBySignBit: encodeTemperatureBySignBit,
   getByteCodeByString: getByteCodeByString,
   getStringByByteCode: getStringByByteCode,
   outputTemperatureFromContract: outputTemperatureFromContract,

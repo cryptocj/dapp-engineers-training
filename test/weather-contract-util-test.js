@@ -3,7 +3,7 @@ var expect = require("chai").expect;
 const {
   getStringByByteCode,
   getByteCodeByString,
-  encodeTemperatureWithSignBit,
+  encodeTemperatureBySignBit,
   decodeTemperatureFromContract,
   signBit,
 } = require("../assignments/first-week/weather-contract-util");
@@ -31,7 +31,7 @@ describe("Weather contract util", function () {
       let expectTemperatureList = [2700, 0, 2700 | signBit];
       for (let i = 0; i < temperatureWithDecimalList.length; i++) {
         expect(
-          encodeTemperatureWithSignBit(temperatureWithDecimalList[i])
+          encodeTemperatureBySignBit(temperatureWithDecimalList[i])
         ).equal(expectTemperatureList[i]);
       }
     });

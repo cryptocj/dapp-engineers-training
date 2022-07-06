@@ -12,7 +12,7 @@ const {
 
 const {
   getByteCodeByString,
-  encodeTemperatureWithSignBit,
+  encodeTemperatureBySignBit,
   outputTemperatureFromContract,
 } = require("./weather-contract-util");
 
@@ -42,7 +42,7 @@ async function reportWeatherRecord(batchId, cityName, temperatureWithDecimal) {
     await weatherRecordContract.populateTransaction.reportWeather(
       batchId,
       cityNameByteCode,
-      encodeTemperatureWithSignBit(temperatureWithDecimal)
+      encodeTemperatureBySignBit(temperatureWithDecimal)
     );
   let estimatedGas = await provider.estimateGas(unsignedTx);
   unsignedTx.gasLimit = estimatedGas;
