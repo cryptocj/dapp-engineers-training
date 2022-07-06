@@ -1,5 +1,7 @@
 All assignments are put into `assignments/first-week` dir.
 
+run `npm install` first.
+
 ## Assignment 1: Read a smart contract
 
 read-oracle.js
@@ -20,9 +22,49 @@ confirmed tx id: 0xa021bd93225e550dcb8a4f0092238c4dffc8809dd7f971327011958dd4afd
 get temperature +28 °C of shenzhen from contract by batch id 1656864453
 ```
 
-## Additional Task: multicall
+## Additional Task
+### Question 1 
+If the API returns the temperature in a decimal form (like 27.5 C),
+how to submit this decimal number to the smart contract while keeping its precision?
 
-get-multiple-city-temperature.js
+Pls check in `weather-source.js`, 
+we can magnify the temperature from `27.5` to `2750`, 
+and do the conversion when reading from the contract.
+### Question 2
+How to store a negative temperature while keeping the current smart contract interface unchanged?
+
+Pls check in `weather-contract-util.js`,
+Normally, temperature should be range from -100 to 100,
+we can use a specific bit(0x10000) as a signal flag.
+
+The encode function is:
+```javascript
+function encodeTemperatureBySignBit(temperature) {
+  if (temperature < 0) return -temperature | signBit;
+  return temperature;
+}
+```
+
+The decode function is:
+```javascript
+function decodeTemperatureFromContract(temperature) {
+  if (temperature == impossibleTemperature * 10 ** temperatureDecimal) {
+    return "impossible";
+  }
+  let exactTemperature = temperature;
+  let signFlag = "+";
+  if (temperature & signBit) {
+    signFlag = "-";
+    exactTemperature = temperature & ~signBit;
+  }
+  return `${signFlag}${exactTemperature / 10 ** temperatureDecimal} °C`;
+}
+```
+
+### Question 3
+multicall
+
+get-multiple-city-temperatures-by-multicall.js
 
 need to compile and deploy the multicall contract first.
 
@@ -58,7 +100,12 @@ const multicallAddress = "0xd2e17686dD5642318e182179081854C7eB32fB56";
 5. use multicall to query
 
 ```shell
-node ./assignments/first-week/get-multiple-city-temperature.js
+node ./assignments/first-week/get-multiple-city-temperatures-by-multicall.js
 get temperature -27.2 °C of shenzhen from contract by batch id 1656757414
 get temperature +26 °C of shenzhen from contract by batch id 1656757389
 ```
+
+Question 3: During the "Step 3" in the task, it will take 3 JSON-RPC calls to
+read weather info for 3 cities from smart contract. Is it possbile to reduce
+that to only one request to get all the data back? (Hint: Google search
+"makerdao multicall")
